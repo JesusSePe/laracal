@@ -1,0 +1,18 @@
+
+@tailwind base;
+
+
+#toogle:checked ~ label div.toogle-dot {
+    @apply translate-x-3;
+}
+
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .btn-primary {
+        padding: 0.5rem 1rem 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 700;
+    }
+}
