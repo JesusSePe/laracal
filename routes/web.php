@@ -39,29 +39,33 @@ Route::get('/login', function(Request $request) {
         'grant_type' => "authorization_code",
         'redirect_uri' => 'http://localhost:8000/login',
     ]);    
-
-    $token = (json_decode($tokenCall, true))["access_token"];
-    $token2 = (json_decode($tokenCall, true))["refresh_token"];
-    // Get Discord user info
-    $res = Http::withToken($token)->get('http://discordapp.com/api/users/@me');
-    $id = (json_decode($res, true))["id"];
-    $username = (json_decode($res, true))["username"];
-    $avatar = (json_decode($res, true))["avatar"];
-    $discriminator = (json_decode($res, true))["discriminator"];
-
-    // Save user token into DB
-    $update = DB::table('users')->upsert([
-        ['id' => $id, 'token' => $token, 'remember_token' => $token2, 'updated_at' => DB::raw('now()')]],
-        ['id'], ['token', 'remember_token', 'updated_at']
-    );
-
-    // All transactions done. Saving on session...
-    session_start();
-    $_SESSION["Dis_id"]=$id;
-    $_SESSION["user"]=$username;
-    $_SESSION["avatar"]=$avatar;
-    $_SESSION["disc"]=$discriminator;
-    return redirect('/dashboard');
+    try {
+        $token = (json_decode($tokenCall, true))["access_token"];
+        $token2 = (json_decode($tokenCall, true))["refresh_token"];
+        // Get Discord user info
+        $res = Http::withToken($token)->get('http://discordapp.com/api/users/@me');
+        $id = (json_decode($res, true))["id"];
+        $username = (json_decode($res, true))["username"];
+        $avatar = (json_decode($res, true))["avatar"];
+        $discriminator = (json_decode($res, true))["discriminator"];
+    
+        // Save user token into DB
+        $update = DB::table('users')->upsert([
+            ['id' => $id, 'token' => $token, 'remember_token' => $token2, 'updated_at' => DB::raw('now()')]],
+            ['id'], ['token', 'remember_token', 'updated_at']
+        );
+    
+        // All transactions done. Saving on session...
+        session_start();
+        $_SESSION["Dis_id"]=$id;
+        $_SESSION["user"]=$username;
+        $_SESSION["avatar"]=$avatar;
+        $_SESSION["disc"]=$discriminator;
+        return redirect('/dashboard');
+    } catch (Exception $e) {
+        return redirect('/');
+    }
+    
 });
 
 // Dashboard. Shows all user's servers.
